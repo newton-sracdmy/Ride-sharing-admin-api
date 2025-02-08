@@ -12,7 +12,6 @@ const adminLogin = async (ctx) => {
     }
 
     const user = await findUserByPhone(phone);
-    console.log(user);
     if (!user) {
       ctx.status = 404;
       ctx.body = { message: 'User not found' };

@@ -1,7 +1,7 @@
-const User = require('../models/userModel');
+const Users = require('../models/Users');
 
 const findUserByPhone = async (phone) => {
-  return await User.findOne({ phone });
+  return await Users.findOne({ phone });
 };
 
 module.exports = { findUserByPhone };
