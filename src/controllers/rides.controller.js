@@ -1,4 +1,5 @@
 const RideService = require("../services/RideService");
+const UserService = require("../services/userService");
 
 const getAllRides = async (ctx) => {
   try {
@@ -17,12 +18,12 @@ const  getRideById = async  (ctx) => {
 
     try {
 
-        const { id:rideId} = ctx.request.query;
-        if (!rideId) {
+        const { id } = ctx.params;
+        if (!id) {
             return res.status(400).json({ message: "Ride ID is required" });
           }
 
-        const ride  = await RideService.getRideById(rideId);
+        const ride  = await RideService.getRideById(id);
         if (!ride) {
             return { error: "Ride not found", status: 404 };
           }
@@ -36,4 +37,34 @@ const  getRideById = async  (ctx) => {
       }
 }
 
-module.exports = { getAllRides, getRideById };
+
+const getRidesSummary = async (ctx) => {
+  try {
+    const approvedDrivers = await UserService.getApprovedDrivers();
+    const unapprovedDrivers = await UserService.getUnapprovedDrivers();
+     
+    const {  totalRides, last7DaysRideStatistics, todaysRides} = await RideService.getRidesSummary();
+    
+    const { activeDrivers, inactiveDrivers} = await UserService. getDriversToday();
+    
+    ctx.body = {
+      ridesSummary: {
+        totalRides,
+        approvedDrivers,
+        unapprovedDrivers,
+        
+      },
+      last7DaysRideStatistics: last7DaysRideStatistics,
+      todaysRides: {
+        ...todaysRides,
+        activeDrivers,
+        inactiveDrivers,
+      },
+    };
+  } catch (error) {
+    ctx.status = 500;
+    ctx.body = { error: error.message };
+  }
+};
+
+module.exports = { getAllRides, getRideById, getRidesSummary };

@@ -1,69 +1,109 @@
 const mongoose = require("mongoose");
+const { CAR_TYPES, RIDE_STATUS, RIDE_TYPES, TRIP_TYPES } = require("../constants/enums");
+const User = require("./Users");
+const LocationSchema = require("./Location");
+const { PassengerDetailsSchema, BreakDetailsSchema, StatusHistorySchema } = require("./statusHistory");
 
-const rideRequestSchema = new mongoose.Schema(
+
+const Schema = mongoose.Schema;
+
+const RideRequestSchema = new Schema(
   {
     user: { 
       type: mongoose.Schema.Types.ObjectId, 
       ref: "User", 
-      required: true 
+     // required: true
     },
 
     pickup: {
-      district: { type: String, required: true },
-      upazila: { type: String, required: true },
-      long_lat: { type: [Number], required: true },
-      union: { type: String, required: true }
+      type: LocationSchema, 
+     // required: true
     },
 
     destination: {
-      long_lat: { type: [Number], required: true },
-      union: { type: String, required: true },
-      upazila: { type: String, required: true },
-      district: { type: String, required: true }
+      type: LocationSchema,
+    //  required: true
+    },
+    
+    stops: {
+    type:BreakDetailsSchema,
+     required:false
     },
 
-    carType: { type: String, required: true }, 
-    isRoundTrip: { type: Boolean, required: true },
+    passenger: {
+      type: PassengerDetailsSchema,
+      required: false
+     },
+
+    requestedSeats: {
+      type: Number,
+      required: false
+     },
+
+    carType: { 
+      type: String, 
+      enum: CAR_TYPES, 
+     // required: true 
+    }, 
+
+    isRoundTrip: { 
+      type: Boolean, 
+      required: false
+    },
+
+    additionalNotes: {
+      type: String,
+      required:false
+    },
+
     status: { 
       type: String, 
-      enum: ["open", "closed", "pending"], 
-      required: true 
+      enum: RIDE_STATUS, 
+      default: RIDE_STATUS.OPEN,
+     // required: true 
     },
-
+  
     rideType: { 
       type: String, 
-      enum: ["instant", "scheduled"], 
-      required: true 
+      enum: RIDE_TYPES, 
+     // required: true 
+    },
+
+    tripType: { 
+      type: String, 
+      enum: TRIP_TYPES, 
+     // required: true 
+    },
+
+    cancelReasons: {
+      type: [String],
+      default: []
     },
 
     expiredAt: { 
       type: Date, 
-      required: true 
+    //  required: true 
     },
-
+     
+    statusUpdatedAt: {
+      type: Date,
+      required: false
+     }
+     ,
     date: { 
       type: Date, 
-      required: true 
+     // required: true 
     },
 
-    time: { type: String, required: true },
+    time: { 
+      type: String, 
+     // required: true 
+    },
 
-    statusHistories: [
-      {
-        status: { 
-          type: String, 
-          enum: ["open", "closed", "pending"], 
-          required: true 
-        },
-        timestamp: { 
-          type: Date, 
-          required: true 
-        }
-      }
-    ]
+    statusHistories: [StatusHistorySchema],
   },
   { timestamps: true }
 );
 
-const RideRequest = mongoose.model("RideRequest", rideRequestSchema);
+const RideRequest = mongoose.model("RideRequest", RideRequestSchema);
 module.exports = RideRequest;

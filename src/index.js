@@ -3,10 +3,11 @@ const bodyParser = require('koa-bodyparser');
 const mongoose = require('mongoose');
 const adminRoutes = require('./routes/admin.routes.js');
 const db = require('./config/db');
+const cors = require('@koa/cors');
 require("dotenv").config();
 
 const app = new Koa();
-
+app.use(cors());
 
 app.use(bodyParser());
 
