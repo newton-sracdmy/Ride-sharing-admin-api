@@ -1,24 +1,47 @@
-const { RIDE_STATUS } = require("../constants/enums");
+const { RIDE_STATUS, ACCOUNT_TYPE } = require("../constants/enums");
 const RideRequest = require("../models/RideRequest");
 const Rides = require("../models/Rides");
 const User = require("../models/Users");
 
-const getAllRides = async () => {
-  try {
-    const rides = await Rides.find()
-      .populate("rideRequest")
-      .populate("user") 
-      .populate("driver") 
-      .populate("vehicle")
+const getAllRides = async (page, limit, status, search) => {
+  const query = {};
 
-    return {
-      rides,
-    };
-  } catch (error) {
-    console.error("Error fetching rides:", error);
-    throw new Error("Error fetching rides");
+  if (status && status !== "all") {
+      query.status = status;
   }
+
+  let userMatch = { type: ACCOUNT_TYPE.PASSENGER };
+  if (search) {
+      userMatch.name = { $regex: search, $options: "i" };
+  }
+
+  const totalRides = await Rides.countDocuments(query);
+
+  const rides = await Rides.find(query)
+      .populate({
+          path: "user",
+          match: userMatch, 
+          select: "name phone type",
+      })
+      .populate("driver")
+      .populate("rideRequest")
+      .populate("vehicle")
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .lean();
+
+  const filteredRides = rides.filter(ride => ride.user && ride.driver);
+
+  return {
+      rides: filteredRides,
+      pagination: {
+          currentPage: page,
+          totalPages: Math.ceil(totalRides / limit),
+          totalRides,
+      },
+  };
 };
+
 
 const getRideById = async (id) => {
   const ride = await Rides.findById(id)

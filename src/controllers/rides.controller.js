@@ -5,12 +5,17 @@ const getAllRides = async (ctx) => {
   try {
     const page = parseInt(ctx.query.page) || 1;
     const limit = parseInt(ctx.query.limit) || 10;
-    const rideData = await RideService.getAllRides(page, limit);
+    const status = ctx.query.status;
+    const search = ctx.query.search;
+
+    const rideData = await RideService.getAllRides(page, limit, status, search);
+
     ctx.status = 200;
     ctx.body = { success: true, data: rideData };
   } catch (error) {
+    console.error("Error in getAllRides controller:", error);
     ctx.status = 500;
-    ctx.body = { success: false, message: "Internal server error", error };
+    ctx.body = { success: false, message: "Internal server error" };
   }
 };
 
