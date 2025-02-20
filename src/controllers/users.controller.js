@@ -3,8 +3,12 @@ const UserService = require("../services/userService");
 const getAllUsers = async (ctx) => {
   try {
     const type = ctx.query.type;
+    const page = parseInt(ctx.query.page) || 1;
+    const limit = parseInt(ctx.query.limit) || 10;
+    const isOnline = ctx.query.isOnline;
+    const search = ctx.query.search;
 
-    const usersData = await UserService.getAllUsers(type);
+    const usersData = await UserService.getAllUsers(type, page, limit, isOnline, search);
     
     ctx.status = 200;
     ctx.body = { success: true, data: usersData };

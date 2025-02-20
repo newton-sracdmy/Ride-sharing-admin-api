@@ -1,13 +1,51 @@
 const { ACCOUNT_STATUS, ACCOUNT_TYPE } = require('../constants/enums');
 const Users = require('../models/Users');
-
-const getAllUsers = async (type) => {
+const getAllUsers = async (type, page, limit, isOnline, search) => {
   const query = {};
+
   if (type) {
     query.type = type;
   }
 
-  return await Users.find(query);
+  if (isOnline && isOnline !== "all") {
+    query.isOnline = isOnline;
+  }
+
+  if (search) {
+    query.$or = [
+      { phone: { $regex: search, $options: "i" } },
+      { name: { $regex: search, $options: "i" } },
+      { email: { $regex: search, $options: "i" } },
+      { emergency_contact: { $regex: search, $options: "i" } },
+      { gender: { $regex: search, $options: "i" } },
+      { status: { $regex: search, $options: "i" } }
+    ];
+
+    const ratingNumber = parseFloat(search);
+    if (!isNaN(ratingNumber)) {
+      query.$or.push({ rating: ratingNumber });
+    }
+
+    const experienceNumber = parseInt(search);
+    if (!isNaN(experienceNumber)) {
+      query.$or.push({ experience: experienceNumber });
+    }
+  }
+
+  const users= await Users.find(query)
+    .skip((page - 1) * limit)
+    .limit(limit)
+    .lean();
+
+    const totalUsers=await Users.countDocuments(query);
+    return {
+      users,
+      pagination: {
+          currentPage: page,
+          totalPages: Math.ceil(totalUsers / limit),
+          totalUsers,
+      },
+  };
 };
 
 

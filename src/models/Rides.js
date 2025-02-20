@@ -3,32 +3,32 @@ const LocationSchema = require("./Location");
 const RideRequest = require("./RideRequest");
 const User = require("./Users");
 const Vehicle = require("./Vehicles");
-const { RIDE_STATUS, CAR_TYPES, TRIP_TYPES } = require("../constants/enums");
+const { RIDE_STATUS, CAR_TYPES, TRIP_TYPES, COLLECTIONNAME } = require("../constants/enums");
 const { BreakDetailsSchema, PassengerDetailsSchema, StatusHistorySchema } = require("./statusHistory");
 
 const rideSchema = new mongoose.Schema(
   {
     rideRequest: { 
       type: mongoose.Schema.Types.ObjectId,
-      ref: "RideRequest",
+      ref: COLLECTIONNAME.RIDE_REQUEST,
       required: true
     },
 
     user: { 
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: COLLECTIONNAME.USER,
       required: true 
     },
 
     driver: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User", 
+      ref: COLLECTIONNAME.USER, 
       required: true 
     },
 
     vehicle: { 
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Vehicle",
+      ref: COLLECTIONNAME.VEHICLES,
       required: true 
     },
 
@@ -124,5 +124,5 @@ const rideSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const Ride = mongoose.model("Ride", rideSchema);
+const Ride = mongoose.model(COLLECTIONNAME.RIDE, rideSchema);
 module.exports = Ride;

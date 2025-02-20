@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const { ACCOUNT_TYPE, ACCOUNT_STATUS } = require('../constants/enums');
+const { ACCOUNT_TYPE, ACCOUNT_STATUS, COLLECTIONNAME } = require('../constants/enums');
 const { Schema } = mongoose;
 
 const DocumentIdentificationSchema = new Schema({
@@ -30,7 +30,7 @@ const userSchema = new mongoose.Schema({
 
   approver: {
     type: Schema.Types.ObjectId,
-    ref: 'User'
+    ref: COLLECTIONNAME.USER
   },
 
   type: { type: String, enum: ACCOUNT_TYPE, default: ACCOUNT_TYPE.ADMIN },
@@ -106,6 +106,6 @@ const userSchema = new mongoose.Schema({
 // UserSchema.index({ type: 1, phone: 1 }, { unique: true });
 // UserSchema.index({ long_lat: '2dsphere' });
 
-const User = mongoose.model('User', userSchema);
+const User = mongoose.model(COLLECTIONNAME.USER, userSchema);
 
 module.exports = User;

@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const { CAR_TYPES, RIDE_STATUS, RIDE_TYPES, TRIP_TYPES } = require("../constants/enums");
+const { CAR_TYPES, RIDE_STATUS, RIDE_TYPES, TRIP_TYPES, COLLECTIONNAME } = require("../constants/enums");
 const User = require("./Users");
 const LocationSchema = require("./Location");
 const { PassengerDetailsSchema, BreakDetailsSchema, StatusHistorySchema } = require("./statusHistory");
@@ -11,7 +11,7 @@ const RideRequestSchema = new Schema(
   {
     user: { 
       type: mongoose.Schema.Types.ObjectId, 
-      ref: "User", 
+      ref: COLLECTIONNAME.USER, 
      // required: true
     },
 
@@ -105,5 +105,5 @@ const RideRequestSchema = new Schema(
   { timestamps: true }
 );
 
-const RideRequest = mongoose.model("RideRequest", RideRequestSchema);
+const RideRequest = mongoose.model(COLLECTIONNAME.RIDE_REQUEST, RideRequestSchema);
 module.exports = RideRequest;

@@ -54,4 +54,42 @@ export const LOCATION_TYPE = Object.freeze({
     HOURLY: 'hourly',
     FIRTI_TRIP: 'firti_trip',
   });
+
+  export const PAYMENT_STATUS=Object.freeze( {
+    DUE : 'due',
+    PAID :'paid',
+    CANCELLED : 'cancelled',
+    FAILED : 'failed',
+  });
+
+  export const COLLECTIONNAME=Object.freeze( {
+    USER : 'users',
+    RIDE_REQUEST : 'ride_requests',
+    RIDE_LOCATION : 'ride_locations',
+    BID : 'bids',
+    VEHICLES : 'vehicles',
+    RIDE : 'rides',
+    PAYMENT : 'payments',
+    MESSAGING : 'messaging',
+    COACH:'coaches',
+    TICKET:'tickets'
+  });
+
+  export const COACH_TYPE = Object.freeze( {
+    AC:"ac",
+    NON_AC:"non"
+  })
+
+  export const COACH_STATUS = Object.freeze( {
+    AVAILABLE:"available",
+    CANCELLED:"cancelled"
+  })
+
+  export const TICKET_STATUS = Object.freeze( {
+    AVAILABLE:"available",
+    CANCELLED:"cancelled",
+    SOLD:"sold"
+  })
+
+  
   

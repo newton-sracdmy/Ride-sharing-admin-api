@@ -5,6 +5,8 @@ mongoose.connect(process.env.MONGO_URI, {
   useUnifiedTopology: true,
 }).then(() => {
   console.log('MongoDB connected');
+  console.log("Registered Models:", mongoose.modelNames());
+
 }).catch(err => {
   console.error('MongoDB connection error:', err);
 });

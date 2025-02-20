@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const { VEHICLE_STATUS } = require('../constants/enums');
+const { VEHICLE_STATUS, COLLECTIONNAME } = require('../constants/enums');
 const { Schema } = mongoose;
 
 const UserDetailsSchema = new Schema({
@@ -28,18 +28,18 @@ const CarDetailsImageSchema = new Schema({
 const VehicleSchema = new Schema({
   approver: {
     type: Schema.Types.ObjectId,
-    ref: 'User'
+    ref: COLLECTIONNAME.USER
   },
   owner: {
     type: Schema.Types.ObjectId,
-    ref: 'User'
+    ref: COLLECTIONNAME.USER
   },
   ownerDetails: {
     type: UserDetailsSchema
   },
   driver: {
     type: Schema.Types.ObjectId,
-    ref: 'User'
+    ref: COLLECTIONNAME.USER
   },
   driverDetails: {
     type: UserDetailsSchema
@@ -94,5 +94,5 @@ VehicleSchema.index(
   { unique: true }
 );
 
-const Vehicle = mongoose.model('Vehicle', VehicleSchema);
+const Vehicle = mongoose.model(COLLECTIONNAME.VEHICLES, VehicleSchema);
 module.exports = Vehicle;
