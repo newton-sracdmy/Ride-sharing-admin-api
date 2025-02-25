@@ -10,6 +10,7 @@ export const LOCATION_TYPE = Object.freeze({
   export const ACCOUNT_STATUS = Object.freeze({
     ACTIVE: 'active',
     INACTIVE: 'inactive',
+    DELETED:'deleted'
   });
   
   export const ACCOUNT_TYPE = Object.freeze({

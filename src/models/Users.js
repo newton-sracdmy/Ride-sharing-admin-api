@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const { ACCOUNT_TYPE, ACCOUNT_STATUS, COLLECTIONNAME } = require('../constants/enums');
+const LocationSchema = require('./Location');
 const { Schema } = mongoose;
 
 const DocumentIdentificationSchema = new Schema({
@@ -95,10 +96,15 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: false
   },
+
+  carLocation: {
+    type: LocationSchema,
+  },
   address: {
     type: String,
     required: false
-  }
+  },
+  lastSeen: { type: Date, default: null },
 },{
   timestamps: true
 });

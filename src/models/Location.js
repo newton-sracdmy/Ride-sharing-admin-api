@@ -13,8 +13,7 @@ const LocationSchema = new Schema({
     type: String,
   },
   district: {
-    type: String,
-    required: true,
+    type: String,   
   },
 });
 

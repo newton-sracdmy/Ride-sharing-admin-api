@@ -7,8 +7,8 @@ const getPayments = async ({ startDate, endDate, status, search, page, limit }) 
     const filter = {};
     if (startDate && endDate) {
         filter.createdAt = {
-            $gte: new Date(startDate),
-            $lte: new Date(endDate),
+            $gte: new Date(startDate), 
+            $lte: new Date(new Date(endDate).setHours(23, 59, 59, 999)), 
         };
     }
 
@@ -18,7 +18,7 @@ const getPayments = async ({ startDate, endDate, status, search, page, limit }) 
 
     if (search) {
         filter.$or = [
-            { "transactionDetails.tran_id": { $regex: search, $options: "i" } },
+            { invoiceNumber: { $regex: search, $options: "i" } },
         ];
     }
 
@@ -70,5 +70,19 @@ const getPaymentByDate = async ({ startDate, endDate }) => {
     
 };
 
-module.exports = { getPaymentByDate };
-module.exports = { getPayments , getPaymentByDate };
+const getPaymentById = async( id ) =>{
+    
+        const payment = await Payments.findById(id)
+        .populate('user')
+        .populate('ride')
+        .populate({
+            path: 'ticket',
+            populate: {
+                path: 'coach',
+            }
+        })
+        .sort({createdAt: -1});
+        return payment;
+}
+
+module.exports = { getPayments , getPaymentByDate , getPaymentById};

@@ -5,10 +5,9 @@ const getAllUsers = async (ctx) => {
     const type = ctx.query.type;
     const page = parseInt(ctx.query.page) || 1;
     const limit = parseInt(ctx.query.limit) || 10;
-    const isOnline = ctx.query.isOnline;
-    const search = ctx.query.search;
+   const { district,upazila, union, isOnline,status, search} = ctx.query;
 
-    const usersData = await UserService.getAllUsers(type, page, limit, isOnline, search);
+    const usersData = await UserService.getAllUsers(type, page, limit, isOnline, status, search,district, upazila, union );
     
     ctx.status = 200;
     ctx.body = { success: true, data: usersData };

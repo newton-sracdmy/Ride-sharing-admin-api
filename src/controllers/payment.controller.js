@@ -59,4 +59,24 @@ const getPaymentFilterByDate = async (ctx) => {
     }
 };
 
-module.exports = { getPaymentList, getPaymentFilterByDate };
+ const getPaymentById = async (ctx) => {
+    const { id }= ctx.params;
+
+    try{
+        const payment = await PaymentService.getPaymentById(id);
+        if(!payment)
+        {
+            ctx.status=404;
+            ctx.body = {message: 'Payment not found' };
+        }
+        else{
+            ctx.status = 200;
+            ctx.body = payment;
+        }
+    } catch (error) {
+        ctx.status = 500;
+        ctx.body = {message: 'Internal Server Error', error:error.message}
+    }
+ }
+
+module.exports = { getPaymentList, getPaymentFilterByDate, getPaymentById };

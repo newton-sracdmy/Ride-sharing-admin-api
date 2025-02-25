@@ -1,6 +1,8 @@
 const { ACCOUNT_STATUS, ACCOUNT_TYPE } = require('../constants/enums');
 const Users = require('../models/Users');
-const getAllUsers = async (type, page, limit, isOnline, search) => {
+const Vehicles = require('../models/Vehicles');
+
+const getAllUsers = async (type, page, limit, isOnline, status, search, district, upazila, union) => {
   const query = {};
 
   if (type) {
@@ -8,60 +10,96 @@ const getAllUsers = async (type, page, limit, isOnline, search) => {
   }
 
   if (isOnline && isOnline !== "all") {
-    query.isOnline = isOnline;
+    query.isOnline = isOnline == 'true' ? true : false;
   }
 
-  if (search) {
-    query.$or = [
-      { phone: { $regex: search, $options: "i" } },
-      { name: { $regex: search, $options: "i" } },
-      { email: { $regex: search, $options: "i" } },
-      { emergency_contact: { $regex: search, $options: "i" } },
-      { gender: { $regex: search, $options: "i" } },
-      { status: { $regex: search, $options: "i" } }
-    ];
+  if (status && status !== "all") {
+    query.status = status;
+  }
 
-    const ratingNumber = parseFloat(search);
-    if (!isNaN(ratingNumber)) {
-      query.$or.push({ rating: ratingNumber });
+
+  if (district || upazila || union) {
+    if (district) {
+      query["carLocation.district"] = district;
     }
-
-    const experienceNumber = parseInt(search);
-    if (!isNaN(experienceNumber)) {
-      query.$or.push({ experience: experienceNumber });
+    if (upazila) {
+      query["carLocation.upazila"] = upazila;
+    }
+    if (union) {
+      query["carLocation.union"] = union;
     }
   }
 
-  const users= await Users.find(query)
-    .skip((page - 1) * limit)
-    .limit(limit)
-    .lean();
+  const totalUsers = await Users.countDocuments(query);
 
-    const totalUsers=await Users.countDocuments(query);
-    return {
-      users,
-      pagination: {
-          currentPage: page,
-          totalPages: Math.ceil(totalUsers / limit),
-          totalUsers,
-      },
+  const users = await Users.aggregate([
+    { $match: query }, 
+    {
+        $lookup: {
+            from: "vehicles",
+            let: { userId: { $toString: "$_id" } },
+            pipeline: [
+                {
+                    $match: {
+                        $expr: { $eq: ["$driver", "$$userId"] }
+                    }
+                },
+                {
+                    $addFields: {
+                        full_car_number: {
+                            $concat: [
+                                { $ifNull: ["$car_number.part_1", ""] }, " ",
+                                { $ifNull: ["$car_number.part_2", ""] }, " ",
+                                { $ifNull: ["$car_number.part_3", ""] }
+                            ]
+                        }
+                    }
+                }
+            ],
+            as: "vehicle"
+        }
+    },
+    { 
+        $unwind: {
+            path: "$vehicle",
+            preserveNullAndEmptyArrays: true
+        }
+    },
+    search
+        ? {
+            $match: {
+                $or: [
+                    { phone: { $regex: search, $options: "i" } },
+                    { name: { $regex: search, $options: "i" } },
+                    { "vehicle.full_car_number": { $regex: search, $options: "i" } }
+                ]
+            }
+        }
+        : null,
+    { $skip: (page - 1) * limit }, 
+    { $limit: limit }
+].filter(Boolean));
+
+  return {
+    users,
+    pagination: {
+      currentPage: page,
+      totalPages: Math.ceil(totalUsers / limit),
+      totalUsers,
+    },
   };
 };
 
-
 const getUserById = async (id) => {
-  try {
+  
     const user = await Users.findById(id);
 
     if (!user) {
       return { message: "User not found", status: 404 };
     }
-    
+   
     return { data: user, status: 200 };
-  } catch (error) {
-    console.error("Error in getUserById:", error); 
-    return { message: "Server error", status: 500 }; 
-  }
+  
 };
 
 const getApprovedDrivers = async () => {
