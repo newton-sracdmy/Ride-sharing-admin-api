@@ -79,4 +79,29 @@ const getPaymentFilterByDate = async (ctx) => {
     }
  }
 
-module.exports = { getPaymentList, getPaymentFilterByDate, getPaymentById };
+ const getPaymentByUser = async (ctx) => {
+    const { userId }= ctx.params;
+
+    try{ 
+        const payment = await PaymentService.getPaymentByUser(userId);
+        if(!payment)
+        {
+            ctx.status=404;
+            ctx.body = {message: 'Payment not found' };
+        }
+        else{
+        const filePath = path.join(__dirname, 'payments.csv');
+
+        fs.writeFileSync(filePath, payment);
+
+        ctx.set('Content-Type', 'text/csv');
+        ctx.set('Content-Disposition', 'attachment; filename="payments.csv"');
+        ctx.body = fs.createReadStream(filePath);
+        }
+    } catch (error) {
+        ctx.status = 500;
+        ctx.body = {message: 'Internal Server Error', error:error.message}
+    }
+ }
+
+module.exports = { getPaymentList, getPaymentFilterByDate, getPaymentById, getPaymentByUser };

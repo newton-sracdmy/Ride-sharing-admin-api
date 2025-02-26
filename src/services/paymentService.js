@@ -83,4 +83,19 @@ const getPaymentById = async( id ) =>{
         return payment;
 }
 
-module.exports = { getPayments , getPaymentByDate , getPaymentById};
+const getPaymentByUser = async (id) => {
+        const payments = await Payments.find({ user: id })
+            .populate('user') 
+            .populate('ride') 
+            .populate({
+                path: 'ticket', 
+                populate: { path: 'coach' } 
+            })
+            .sort({ createdAt: -1 }); 
+
+        return convertToCSV(payments); 
+};
+
+
+
+module.exports = { getPayments , getPaymentByDate , getPaymentById, getPaymentByUser};

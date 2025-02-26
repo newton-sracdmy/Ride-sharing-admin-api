@@ -6,7 +6,7 @@ const { Schema, model, Types } = mongoose;
 const PaymentSchema = new Schema(
   {
     user: {
-      type: Types.ObjectId,
+      type:String,
       ref: COLLECTIONNAME.USER,
       required: true,
     },
