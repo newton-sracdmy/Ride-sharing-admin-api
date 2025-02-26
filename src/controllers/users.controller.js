@@ -42,4 +42,26 @@ const  getUserById = async  (ctx) => {
       }
 }
 
-module.exports = {getAllUsers , getUserById };
+
+const changeDriverStatus = async (ctx) => {
+  try {
+    const { id } = ctx.params;
+    const { status } = ctx.request.body;
+    if (!id) {
+      throw new Error("User ID is required");
+    }
+
+    const updatedUser = await UserService.updateUserStatus(id, status);
+
+    ctx.status = 200;
+    ctx.body = {
+      success: true,
+      message: `User ${updatedUser._id} status updated to ${updatedUser.status}`,
+    };
+  } catch (error) {
+    ctx.status = 400;
+    ctx.body = { success: false, message: error.message };
+  }
+};
+
+module.exports = {getAllUsers , getUserById, changeDriverStatus};

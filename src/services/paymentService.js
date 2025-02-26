@@ -40,8 +40,6 @@ const getPayments = async ({ startDate, endDate, status, search, page, limit }) 
       };
 };
 
-
-
 const getPaymentByDate = async ({ startDate, endDate }) => {
     const filter = {};
     if (startDate && endDate) {

@@ -1,6 +1,7 @@
 const { ACCOUNT_STATUS, ACCOUNT_TYPE } = require('../constants/enums');
 const Users = require('../models/Users');
 const Vehicles = require('../models/Vehicles');
+const mongoose = require("mongoose");
 
 const getAllUsers = async (type, page, limit, isOnline, status, search, district, upazila, union) => {
   const query = {};
@@ -91,15 +92,47 @@ const getAllUsers = async (type, page, limit, isOnline, status, search, district
 };
 
 const getUserById = async (id) => {
-  
-    const user = await Users.findById(id);
+  const user = await Users.aggregate([
+      {
+          $match: { _id: new mongoose.Types.ObjectId(id) }
+      },
+      {
+          $lookup: {
+              from: "vehicles",
+              let: { userId: { $toString: "$_id" } },
+              pipeline: [
+                  {
+                      $match: {
+                          $expr: { $eq: ["$driver", "$$userId"] }
+                      }
+                  }
+              ],
+              as: "vehicle"
+          }
+      },
+      {
+          $lookup: {
+              from: "payments",
+              let: { userId: { $toString: "$_id" } },
+              pipeline: [
+                  {
+                      $match: {
+                          $expr: { $eq: ["$user", "$$userId"] }
+                      }
+                  }
+              ],
+              as: "payment"
+          }
+      },
+      {
+          $unwind: {
+              path: "$vehicle",
+              preserveNullAndEmptyArrays: true
+          }
+      }
+  ]);
 
-    if (!user) {
-      return { message: "User not found", status: 404 };
-    }
-   
-    return { data: user, status: 200 };
-  
+  return { data: user[0], status: 200 };
 };
 
 const getApprovedDrivers = async () => {
@@ -132,11 +165,23 @@ const getDriversToday = async () => {
   };
 };
 
+const updateUserStatus = async (userId, status) => {
+  if (!Object.values(ACCOUNT_STATUS).includes(status)) {
+    throw new Error("Invalid status value");
+  }
+ 
+  const user = await Users.findByIdAndUpdate(userId, { status }, { new: true });
+  if (!user) throw new Error("User not found");
+
+  return user;
+};
+
 
 module.exports={ 
   getAllUsers,
   getUserById, 
   getApprovedDrivers,
   getUnapprovedDrivers,
-  getDriversToday
+  getDriversToday,
+  updateUserStatus
 }
