@@ -1,45 +1,59 @@
 const { findUserByPhone } = require('../services/adminService');
 const { comparePasswords } = require('../utils/passwordUtils');
 const { generateToken } = require('../utils/generateToken');
+const { validateAdminLogin } = require('../helper/validationHelper');
+const { statusCodes } = require('../helper/statusCodes');
+const { errorResponseHandler } = require('../helper/errorResponseHandler');
 
 const adminLogin = async (ctx) => {
   try {
     const { phone, password } = ctx.request.body;
-    if (!phone || !password) {
-      ctx.status = 400;
-      ctx.body = { message: 'Phone and password are required' };
-      return;
+    const { error } = validateAdminLogin({ phone, password });
+    if (error) {
+      throw Object.assign(new Error(), {
+        status:statusCodes.BAD_REQUEST,
+        error: {
+          code: 40001,
+        },
+      });
     }
 
     const user = await findUserByPhone(phone);
     if (!user) {
-      ctx.status = 404;
-      ctx.body = { message: 'User not found' };
-      return;
+      throw Object.assign(new Error(), {
+        status: statusCodes.NOT_FOUND,
+        error: {
+          code: 40401,
+        },
+      });
     }
 
     const isMatch = await comparePasswords(password, user.password);
     if (!isMatch) {
-      ctx.status = 401;
-      ctx.body = { message: 'Invalid credentials' };
-      return;
+      throw Object.assign(new Error(), {
+        status: statusCodes.UNAUTHORIZED,
+        error: {
+          code: 40101,
+        },
+      });
     }
 
     const token = await generateToken(user);
 
-    ctx.status = 200;
-    ctx.body = {
-      token,
-      user: {
-        _id: user._id,
-        name: user.name,
-        type: user.type,
-        status: user.status,
+    return ctx.ok(
+      {
+        token,
+        user: {
+          _id: user._id,
+          name: user.name,
+          type: user.type,
+          status: user.status,
+        },
       },
-    };
+      'Login successful'
+    );
   } catch (error) {
-    ctx.status = 500;
-    ctx.body = { message: 'Internal server error', error: error.message };
+    errorResponseHandler(error, ctx);
   }
 }
  

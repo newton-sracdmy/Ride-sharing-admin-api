@@ -1,5 +1,5 @@
 
-const { convertToCSV } = require("../helper/convertJsonToCsv");
+const { convertToCSV } = require("../utils/convertJsonToCsv");
 const Coaches = require("../models/Coaches");
 const Payments = require("../models/Payments");
 const Tickets = require("../models/Tickets");

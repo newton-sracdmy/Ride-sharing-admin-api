@@ -119,6 +119,12 @@ const getUserById = async (id) => {
                       $match: {
                           $expr: { $eq: ["$user", "$$userId"] }
                       }
+                  },
+                  {
+                      $group: {
+                          _id: null,
+                          totalPayment: { $sum: "$amount" }
+                      }
                   }
               ],
               as: "payment"
@@ -129,11 +135,23 @@ const getUserById = async (id) => {
               path: "$vehicle",
               preserveNullAndEmptyArrays: true
           }
+      },
+      {
+          $unwind: {
+              path: "$payment",
+              preserveNullAndEmptyArrays: true
+          }
+      },
+      {
+          $addFields: {
+              totalPayment: { $ifNull: ["$payment.totalPayment", 0] }
+          }
       }
   ]);
 
   return { data: user[0], status: 200 };
 };
+
 
 const getApprovedDrivers = async () => {
   return await Users.countDocuments({ status: ACCOUNT_STATUS.ACTIVE, type: ACCOUNT_TYPE.DRIVER });
